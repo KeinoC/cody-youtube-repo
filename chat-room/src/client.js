@@ -7,14 +7,18 @@ import ReactDOM from "react-dom";
 import { useEffect, useState } from "react";
 import moment from "moment";
 
+//components
+import GameWindow from "./GameWindow.jsx"; 
+
 const username = prompt("what is your username");
 
 const socket = io("http://localhost:3000", {
   transports: ["websocket", "polling"]
 });
 
-const App = ({}) => {
+function App ({}) {
   const [users, setUsers] = useState([]);
+  const [player, setPlayer] = useState("");
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
 
@@ -27,12 +31,17 @@ const App = ({}) => {
       setUsers(users);
     });
 
+    socket.on("connected", player => {
+      setPlayer(player)
+    })
+
+
     socket.on("message", message => {
       setMessages(messages => [...messages, message]);
     });
 
     socket.on("connected", user => {
-      setUsers(users => [...users, user]);
+      setUsers(users => [...users, user])
     });
 
     socket.on("disconnected", id => {
@@ -48,8 +57,19 @@ const App = ({}) => {
     setMessage("");
   };
 
+////
+console.log(player)
+
   return (
     <div className="container">
+
+      <div className="container-xxl">
+         <GameWindow users = {users} username={username} player={player} />
+      </div>
+
+
+
+
       <div className="row">
         <div className="col-md-12 mt-4 mb-4">
           <h6>Hello {username}</h6>
@@ -89,8 +109,8 @@ const App = ({}) => {
         <div className="col-md-4">
           <h6>Users</h6>
           <ul id="users">
-            {users.map(({ name, id }) => (
-              <li key={id}>{name}</li>
+            {users.map(({ name, id, score }) => (
+              <li key={id}>{name}: {score}</li>
             ))}
           </ul>
         </div>
